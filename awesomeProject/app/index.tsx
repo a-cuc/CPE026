@@ -26,10 +26,7 @@ export default function Index() {
   };
   return (
     <View style={styles.appContainer}>
-      <Modal
-        visible={showLimitModal}
-        animationType="slide"
-      >
+      <Modal visible={showLimitModal} animationType="slide">
         <Text>Too much goals might be a burden!</Text>
         <Pressable style={styles.closeButton} onPress={() => setShowLimitModal(!showLimitModal)}>
           <Text style={styles.buttonText}>Close</Text>
