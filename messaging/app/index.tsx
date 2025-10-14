@@ -1,9 +1,11 @@
 import { Text, View, StyleSheet } from "react-native";
+import Status from "./components/Status";
 
 export default function Index() {
   return (
-    <View>
-      <View style={styles.container}>
+    <View style={styles.container}>
+      <Status />
+      <View style={styles.content}>
         <Text>Edit app/index.tsx to edit this screen.</Text>
       </View>
     </View>
