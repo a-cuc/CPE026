@@ -1,10 +1,30 @@
 import { Constants } from 'expo';
-import { NetInfo, Platform, StatusBar, StyleSheet, Text, View } from 'react-native';
+import {Platform, StatusBar, StyleSheet, Text, View } from 'react-native';
+import NetInfo from '@react-native-community/netinfo';
 import React from 'react';
+
 export default class Status extends React.Component{
     state = {
     info: 'none',
-};
+    };
+    componentDidMount() {
+        // Get initial connection info
+        NetInfo.fetch().then(state => {
+            this.setState({ info: state.type });
+        });
+
+        // Listen for connection changes
+        this.unsubscribe = NetInfo.addEventListener(state => {
+            this.setState({ info: state.type });
+        });
+    }
+
+    componentWillUnmount() {
+        if (this.unsubscribe) {
+            this.unsubscribe();
+        }
+    }
+
 render() {
     const {info} = this.state;
     const isConnected = info !== 'none';
