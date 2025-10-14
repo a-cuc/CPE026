@@ -6,7 +6,7 @@ export default function Index() {
     <View style={styles.container}>
       <Status />
       <View style={styles.content}>
-        <Text>Edit app/index.tsx to edit this screen.</Text>
+        
       </View>
     </View>
   );

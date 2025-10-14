@@ -30,7 +30,7 @@ render() {
     if(Platform.OS == 'ios'){
         return <View style={[styles.status, {backgroundColor}]}></View>
     }
-    return null; //Temporary!
+    return messageContainer;
 }
 }
 
