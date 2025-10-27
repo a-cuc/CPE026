@@ -4,6 +4,7 @@ import Status from "./components/Status";
 import MessageList from "./components/MessageList";
 import { createImageMessage, createLocationMessage, createTextMessage } from "./utils/MessageUtils";
 import type { JSX } from "react";
+import Toolbar from "./components/Toolbar";
 
 const initialMessages = [
   createImageMessage('https://unsplash.it/300/300'),
@@ -18,8 +19,36 @@ type MessagePressEvent = {
 };
 
 export default function Index(): JSX.Element {
-  const [messages] = useState(initialMessages);
+  const [messages, setMessages] = useState(initialMessages);
   const [fullscreenImageId, setFullscreenImageId] = useState<string | null>(null);
+  const [isInputFocused, setIsInputFocused] = useState(false);
+
+  const handlePressToolbarCamera = (): void => {
+    // Handle toolbar camera button press
+  };
+  const handlePressToolbarLocation = (): void => {
+    // Handle toolbar location button press
+  };
+  const handleChangeFocus = (isFocused: boolean): void => {
+    setIsInputFocused(isFocused);
+  };
+  const handleSubmit = (text: string): void => {
+    setMessages(prev => [createTextMessage(text), ...prev]);
+  };
+  const renderToolbar = (): JSX.Element => {
+    const isFocused = isInputFocused;
+    return (
+      <View style={styles.toolbar}>
+        <Toolbar
+          isInputFocused={isInputFocused}
+          onSubmit={handleSubmit}
+          onChangeFocus={handleChangeFocus}
+          onPressCamera={handlePressToolbarCamera}
+          onPressLocation={handlePressToolbarLocation}
+        />
+      </View>
+    );
+  }
 
   const dismissFullscreenImage = (): void => {
     setFullscreenImageId(null);
@@ -86,6 +115,7 @@ export default function Index(): JSX.Element {
       <Status />
       {renderMessageList()}
       {renderFullscreenImage()}
+      {renderToolbar()}
     </View>
   );
 }
