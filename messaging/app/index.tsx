@@ -5,6 +5,7 @@ import MessageList from "./components/MessageList";
 import { createImageMessage, createLocationMessage, createTextMessage } from "./utils/MessageUtils";
 import type { JSX } from "react";
 import Toolbar from "./components/Toolbar";
+import * as Location from 'expo-location';
 
 const initialMessages = [
   createImageMessage('https://unsplash.it/300/300'),
@@ -26,8 +27,20 @@ export default function Index(): JSX.Element {
   const handlePressToolbarCamera = (): void => {
     // Handle toolbar camera button press
   };
-  const handlePressToolbarLocation = (): void => {
-    // Handle toolbar location button press
+  const handlePressToolbarLocation = async (): Promise<void> => {
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    Location.getCurrentPositionAsync().then((position) => {
+      const {
+        coords: { latitude, longitude },
+      } = position;
+      setMessages((prev) => [
+        createLocationMessage({
+          latitude,
+          longitude,
+        }),
+        ...prev,
+      ]);
+    });
   };
   const handleChangeFocus = (isFocused: boolean): void => {
     setIsInputFocused(isFocused);
