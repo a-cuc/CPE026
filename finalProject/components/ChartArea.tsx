@@ -1,12 +1,13 @@
 import { View, Text, StyleSheet, ScrollView, Dimensions } from 'react-native';
+import { LineChart } from 'react-native-chart-kit';
 import { MonitoringRecord } from '../utils/monitoring';
 
 interface ChartAreaProps {
   monitoring?: MonitoringRecord[];
 }
 
-// Simple line chart representation using text-based visualization
-// For a full chart solution, you would need react-native-svg with victory-native or similar
+const screenWidth = Dimensions.get('window').width - 40; // Account for padding
+
 export default function ChartArea({ monitoring = [] }: ChartAreaProps) {
   const MAX_POINTS = 20;
 
@@ -29,42 +30,77 @@ export default function ChartArea({ monitoring = [] }: ChartAreaProps) {
     else if (metric === 'moisture') moistureData.push(value);
   }
 
-  const getAvg = (arr: number[]) => arr.length > 0 ? (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1) : 'N/A';
-  const getMin = (arr: number[]) => arr.length > 0 ? Math.min(...arr).toFixed(1) : 'N/A';
-  const getMax = (arr: number[]) => arr.length > 0 ? Math.max(...arr).toFixed(1) : 'N/A';
+  const getLatest = (arr: number[]) => arr.length > 0 ? arr[arr.length - 1].toFixed(1) : 'N/A';
+
+  // Prepare data for the line chart
+  const maxLength = Math.max(tempData.length, humidityData.length, moistureData.length);
+  const labels = Array.from({ length: Math.min(maxLength, 10) }, (_, i) => `${i + 1}`);
+
+  const chartData = {
+    labels: labels,
+    datasets: [
+      {
+        data: tempData.slice(-10).length > 0 ? tempData.slice(-10) : [0],
+        color: (opacity = 1) => `rgba(245, 158, 66, ${opacity})`, // Temperature - orange
+        strokeWidth: 2,
+      },
+      {
+        data: humidityData.slice(-10).length > 0 ? humidityData.slice(-10) : [0],
+        color: (opacity = 1) => `rgba(56, 189, 248, ${opacity})`, // Humidity - blue
+        strokeWidth: 2,
+      },
+      {
+        data: moistureData.slice(-10).length > 0 ? moistureData.slice(-10) : [0],
+        color: (opacity = 1) => `rgba(34, 197, 94, ${opacity})`, // Moisture - green
+        strokeWidth: 2,
+      },
+    ],
+    legend: ['Temperature', 'Humidity', 'Moisture'],
+  };
+
+  const chartConfig = {
+    backgroundColor: '#ffffff',
+    backgroundGradientFrom: '#f0fdf4',
+    backgroundGradientTo: '#dcfce7',
+    decimalPlaces: 1,
+    color: (opacity = 1) => `rgba(21, 128, 61, ${opacity})`,
+    labelColor: (opacity = 1) => `rgba(55, 65, 81, ${opacity})`,
+    style: {
+      borderRadius: 16,
+    },
+    propsForDots: {
+      r: '4',
+      strokeWidth: '2',
+      stroke: '#15803d',
+    },
+  };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>📈 Sensor Trends</Text>
-      <Text style={styles.subtitle}>Last {sortedData.length} readings</Text>
-      
-      <View style={styles.statsContainer}>
-        <View style={styles.statRow}>
-          <Text style={[styles.statLabel, { color: '#f59e42' }]}>🌡️ Temperature:</Text>
-          <Text style={styles.statValue}>
-            Avg: {getAvg(tempData)}°C | Min: {getMin(tempData)}°C | Max: {getMax(tempData)}°C
-          </Text>
-        </View>
+    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+      <View style={styles.container}>
+        <Text style={styles.title}>📈 Sensor Trends</Text>
+        <Text style={styles.subtitle}>Last {sortedData.length} readings</Text>
         
-        <View style={styles.statRow}>
-          <Text style={[styles.statLabel, { color: '#38bdf8' }]}>💧 Humidity:</Text>
-          <Text style={styles.statValue}>
-            Avg: {getAvg(humidityData)}% | Min: {getMin(humidityData)}% | Max: {getMax(humidityData)}%
-          </Text>
-        </View>
-        
-        <View style={styles.statRow}>
-          <Text style={[styles.statLabel, { color: '#22c55e' }]}>💦 Moisture:</Text>
-          <Text style={styles.statValue}>
-            Avg: {getAvg(moistureData)}% | Min: {getMin(moistureData)}% | Max: {getMax(moistureData)}%
-          </Text>
-        </View>
+        {maxLength > 0 ? (
+          <LineChart
+            data={chartData}
+            width={screenWidth}
+            height={220}
+            chartConfig={chartConfig}
+            bezier
+            style={styles.chart}
+            withVerticalLabels={true}
+            withHorizontalLabels={true}
+            withDots={true}
+            withShadow={false}
+            withInnerLines={true}
+            withOuterLines={true}
+          />
+        ) : (
+          <Text style={styles.noData}>No data available</Text>
+        )}
       </View>
-
-      <Text style={styles.note}>
-        Note: For full interactive charts, consider installing victory-native or react-native-chart-kit
-      </Text>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -93,25 +129,14 @@ const styles = StyleSheet.create({
     color: '#6b7280',
     marginBottom: 16,
   },
-  statsContainer: {
-    gap: 12,
+  chart: {
+    marginVertical: 8,
+    borderRadius: 16,
   },
-  statRow: {
-    marginBottom: 8,
-  },
-  statLabel: {
-    fontSize: 15,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  statValue: {
-    fontSize: 14,
-    color: '#374151',
-  },
-  note: {
-    marginTop: 16,
-    fontSize: 12,
+  noData: {
+    textAlign: 'center',
+    fontSize: 16,
     color: '#9ca3af',
-    fontStyle: 'italic',
+    paddingVertical: 40,
   },
 });
